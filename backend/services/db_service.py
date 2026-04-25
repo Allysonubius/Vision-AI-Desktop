@@ -11,23 +11,6 @@ def generate_image_hash(image_bytes: bytes) -> str:
 
 
 # =========================
-# VALIDATION (🔥 NOVO)
-# =========================
-def is_valid_analysis(analysis: dict) -> bool:
-    if not isinstance(analysis, dict):
-        return False
-
-    if not analysis.get("description"):
-        return False
-
-    # evita salvar erro padrão
-    if "Erro ao interpretar" in analysis.get("description", ""):
-        return False
-
-    return True
-
-
-# =========================
 # CACHE
 # =========================
 def get_cached_analysis(image_hash):
@@ -47,7 +30,7 @@ def get_cached_analysis(image_hash):
         try:
             analysis = json.loads(row[2])
         except Exception:
-            print("⚠️ Cache corrompido ignorado")
+            print("⚠️ Cache corrompido - ignorando")
             return None
 
         return {
@@ -60,16 +43,18 @@ def get_cached_analysis(image_hash):
     return None
 
 
+# =========================
+# SAVE ANALYSIS
+# =========================
 def save_analysis(image_hash, result):
-    analysis = result.get("analysis", {})
-
-    # 🔥 NÃO salva lixo
-    if not is_valid_analysis(analysis):
-        print("⚠️ Resultado inválido - NÃO salvo no banco")
-        return
-
     conn = get_conn()
     cursor = conn.cursor()
+
+    try:
+        analysis_json = json.dumps(result["analysis"])
+    except Exception:
+        print("❌ Erro ao serializar analysis - não salvando")
+        return
 
     cursor.execute("""
     INSERT OR REPLACE INTO image_analysis
@@ -79,7 +64,7 @@ def save_analysis(image_hash, result):
         image_hash,
         result["prediction"],
         result["confidence"],
-        json.dumps(analysis),
+        analysis_json,
         "processed"
     ))
 
@@ -178,7 +163,7 @@ def create_indexes():
 
 
 # =========================
-# GET BY HASH (🔥 protegido)
+# GET BY HASH
 # =========================
 def get_analysis_by_hash(image_hash):
     conn = get_conn()
@@ -212,7 +197,7 @@ def get_analysis_by_hash(image_hash):
 
 
 # =========================
-# LIST RECENT
+# LISTAGEM RECENTE (🔥 ESSENCIAL pro seu erro)
 # =========================
 def get_recent_analyses(limit=10):
     conn = get_conn()

@@ -311,63 +311,75 @@ def build_prompt(label, confidence, top_predictions):
     return f"""
 Responda OBRIGATORIAMENTE em português do Brasil.
 
-Você é um engenheiro de visão computacional analisando uma imagem REAL.
+Você é um especialista em visão computacional focado em ANÁLISE VISUAL REAL.
 
-IMPORTANTE:
-A saída da CNN NÃO é verdade absoluta.
-Ela é apenas uma sugestão e pode estar ERRADA.
+OBJETIVO:
+Classificar corretamente o tipo de superfície com base na imagem.
 
-Sua prioridade é:
-1. Evidência visual da imagem
-2. Coerência com as classes válidas
-3. Só depois considerar a CNN
+PRIORIDADE ABSOLUTA:
+1. Evidência visual (textura, padrão, iluminação, irregularidade)
+2. Coerência física da superfície
+3. Consistência com classes válidas
+4. CNN (apenas como contexto auxiliar, NÃO como verdade)
 
 CLASSES VÁLIDAS:
-- asphalt
-- cobblestone
-- offroad
+- asphalt (superfície lisa, contínua, reflexiva)
+- cobblestone (blocos/pedras irregulares, textura segmentada)
+- offroad (terra, areia, irregularidade natural)
 
-DADOS DA CNN (hipótese, pode estar errada):
+DADOS DA CNN (contexto auxiliar):
 Predição: {label}
 Confiança: {confidence:.2f} ({confidence_level})
 
 Top predições:
 {top_predictions}
 
-REGRAS CRÍTICAS:
+REGRAS IMPORTANTES:
 
-- Se a CNN estiver inconsistente com a imagem:
-  → IGNORE a CNN
-  → Corrija a classificação
+- A análise deve ser guiada pela imagem, NÃO pela CNN
+- Só mencione a CNN se houver inconsistência relevante
+- NÃO baseie sua decisão na confiança da CNN
+- Foque em evidências visuais concretas:
+  → textura (lisa, rugosa, segmentada)
+  → padrão (uniforme vs blocos)
+  → reflexão de luz
+  → continuidade da superfície
+  → irregularidade
 
-- Se a confiança for ALTA:
-  → Seja assertivo, MAS apenas se for coerente visualmente
-
-- Nunca aceite classes fora das válidas
-
-- Se a CNN gerar classe inválida (ex: belgian_blocks):
-  → Faça o mapeamento correto para:
-     - cobblestone (se for pedra/bloco)
-     - asphalt (se for superfície lisa)
-     - offroad (terra/irregular)
+- Evite explicações genéricas
+- Seja técnico e direto
 
 TAREFA:
 
-Gere uma análise técnica COMPLETA da imagem:
+Gere uma análise técnica estruturada contendo:
 
-1. description (detalhada e visual)
-2. predicted_class_interpretation (baseada na imagem, NÃO na CNN)
+1. description
+   → Descreva SOMENTE o que é visível (sem suposições)
+   → Foque em textura, iluminação, padrão e material
+
+2. predicted_class_interpretation
+   → Classificação baseada EXCLUSIVAMENTE na evidência visual
+   → NÃO justifique com CNN
+
 3. challenges (ARRAY)
-4. critical_analysis (incluindo erro da CNN se houver)
-5. limitations
-6. improvements
+   → dificuldades reais da imagem (luz, ruído, ambiguidade)
 
-REGRAS:
+4. critical_analysis
+   → Justifique tecnicamente a classificação
+   → Compare características visuais das classes
+   → Só mencione a CNN se houver conflito relevante
+
+5. limitations
+   → limitações reais da análise visual
+
+6. improvements
+   → melhorias práticas no sistema (modelo, imagem, pipeline)
+
+REGRAS DE SAÍDA:
 - SOMENTE JSON
 - SEM markdown
 - NÃO escreva nada fora do JSON
 """
-
 
 def build_fallback_prompt():
     return """

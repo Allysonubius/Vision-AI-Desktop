@@ -1,8 +1,12 @@
-import sqlite3
 import os
-import json
+import sqlite3
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "images.db")
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # sobe 1 nível (backend/)
+DB_PATH = os.path.join(BASE_DIR, "app.db")
+
+
+def get_conn():
+    return sqlite3.connect(DB_PATH)
 
 
 def get_conn():
@@ -14,14 +18,32 @@ def init_db():
     cursor = conn.cursor()
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS images (
-        id TEXT PRIMARY KEY,
-        hash TEXT,
-        status TEXT,
+    CREATE TABLE IF NOT EXISTS image_analysis (
+        image_hash TEXT PRIMARY KEY,
         prediction TEXT,
         confidence REAL,
         analysis TEXT,
         source TEXT,
+        status TEXT,
+
+        cnn_latency REAL,
+        llm_latency REAL,
+        llm_tokens INTEGER,
+
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS metrics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        image_hash TEXT,
+        prediction TEXT,
+        source TEXT,
+        status TEXT,
+        cnn_latency REAL,
+        llm_latency REAL,
+        llm_tokens INTEGER,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
