@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+requests
+pydantic
+python-dotenv
+torch
+torchvision
+pillow
+opencv-python
+sqlalchemy
+python-multipart
+scikit-learn 
+matplotlib
+notebook

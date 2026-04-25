@@ -1,0 +1,170 @@
+# =========================
+
+# NODE / REACT / ELECTRON
+
+# =========================
+
+node_modules/
+dist/
+build/
+out/
+.next/
+.cache/
+coverage/
+
+# Logs
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env
+
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Electron
+
+*.asar
+electron-builder.yml
+release/
+
+# =========================
+
+# PYTHON / FASTAPI
+
+# =========================
+
+**pycache**/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual envs
+
+venv/
+env/
+.venv/
+
+# FastAPI / Uvicorn
+
+*.log
+
+# =========================
+
+# BANCO DE DADOS
+
+# =========================
+
+*.db
+*.sqlite
+*.sqlite3
+
+# (se quiser manter estrutura mas ignorar dados)
+
+!database/.gitkeep
+
+# =========================
+
+# MODELOS / IA
+
+# =========================
+
+# Modelos grandes locais (LM Studio, CNN, etc)
+
+models/
+*.bin
+*.pt
+*.pth
+*.onnx
+*.safetensors
+
+# Cache de inferência
+
+cache/
+tmp/
+temp/
+
+# =========================
+
+# IMAGENS / UPLOADS
+
+# =========================
+
+uploads/
+images/
+*.jpg
+*.jpeg
+*.png
+*.webp
+
+# (opcional: manter pasta)
+
+!uploads/.gitkeep
+
+# =========================
+
+# SISTEMA OPERACIONAL
+
+# =========================
+
+.DS_Store
+Thumbs.db
+
+# =========================
+
+# IDEs / EDITORES
+
+# =========================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+
+# TESTES / DEBUG
+
+# =========================
+
+.pytest_cache/
+coverage.xml
+htmlcov/
+
+# =========================
+
+# BUILD / OUTPUT APP
+
+# =========================
+
+*.exe
+*.dmg
+*.AppImage
+*.deb
+
+# =========================
+
+# SEGURANÇA
+
+# =========================
+
+# Chaves e configs sensíveis
+
+*.pem
+*.key
+secrets.json
+
+# =========================
+
+# MISC
+
+# =========================
+
+*.tmp
+*.bak

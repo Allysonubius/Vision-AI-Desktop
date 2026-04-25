@@ -1,0 +1,18 @@
+{
+  "name": "ai-agent",
+  "main": "electron/main.js",
+  "scripts": {
+    "backend": "cd backend && uvicorn main:app --host 127.0.0.1 --port 8000 --reload",
+    "frontend": "cd frontend && npm start",
+    "electron": "wait-on http://localhost:3000 && electron .",
+
+    "dev": "concurrently -n BACK,FRONT,ELECTRON -c green,blue,yellow \"npm run backend\" \"npm run frontend\" \"npm run electron\"",
+
+    "dev:isolated": "echo \"Run services manually in separate terminals\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "wait-on": "^9.0.5",
+    "electron": "^30.0.0"
+  }
+}
