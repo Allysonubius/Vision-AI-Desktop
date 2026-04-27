@@ -1,356 +1,232 @@
-# 🧠 📦 Backend – Documentação Completa
+# 🧠 Backend de Análise de Imagens (CNN + LLM)
+
+Sistema de análise inteligente de superfícies de vias combinando **Visão Computacional (CNN)** e **Modelos de Linguagem (LLM)** em um pipeline híbrido.
+
+---
 
 ## 🎯 Visão Geral
 
-Este backend foi desenvolvido para suportar um sistema de análise de imagens de vias, combinando:
+Este projeto implementa um backend capaz de:
 
-* **Visão computacional (CNN)**
-* **Modelos de linguagem (LLM multimodal)**
-* **API REST com FastAPI**
-* **Pipeline inteligente com fallback**
+* Classificar imagens em:
 
-O objetivo é permitir:
+  * Asphalt
+  * Cobblestone
+  * Offroad
+* Gerar análises descritivas com LLM
+* Combinar visão computacional + interpretação semântica
+* Armazenar histórico e métricas
 
-* Classificação de imagens (asphalt, cobblestone, offroad)
-* Análise automática da imagem
-* Interpretação crítica dos resultados
-
----
-
-# 🏗️ Estrutura do Projeto
-
-```bash
-backend/
-│
-├── api/
-├── services/
-├── schemas/
-├── database/
-├── repositories/
-├── models/
-├── uploads/
-├── main.py
-└── app.db
-```
+👉 O foco não é apenas prever, mas **interpretar a imagem de forma contextual**.
 
 ---
 
-# 🔹 1. Camada de API (`api/`)
-
-Responsável por expor os endpoints HTTP.
-
-## 📁 `api/routes/`
-
-### ✔️ `vision.py`
-
-* Endpoint principal de análise de imagem
-* Recebe imagem (base64 ou file)
-* Chama `image_service`
-
-```python
-POST /vision/analyze
-```
-
-👉 Função:
-
-* Entrada do sistema de visão
-
----
-
-### ✔️ `chat.py`
-
-* Comunicação com LLM
-* Permite interações adicionais
-
----
-
-### ✔️ `history.py`
-
-* Consulta histórico de análises
-
----
-
-### ✔️ `health.py`
-
-* Healthcheck do sistema
-
----
-
-# 🔹 2. Camada de Services (`services/`)
-
-👉 **Coração do sistema**
-
-Aqui acontece toda a lógica.
-
----
-
-## 🧠 `image_service.py` (ORQUESTRADOR)
-
-Responsável por:
-
-1. Receber imagem
-2. Chamar CNN
-3. Decidir fallback
-4. Chamar LLM
-5. Montar resposta final
-
-### 🔥 Fluxo:
+## 🧠 Arquitetura
 
 ```text
-Imagem → CNN → (falha?) → LLM → JSON final
+Imagem → CNN → (baixa confiança?) → LLM → Resposta estruturada
 ```
 
----
-
-## 🤖 `cnn_service.py`
-
-Responsável por:
-
-* Carregar modelo (`.pth`)
-* Fazer inferência
-* Retornar predição estruturada
-
-### ✔️ Retorno padrão:
-
-```json
-{
-  "label": "asphalt",
-  "confidence": 0.87,
-  "status": "success",
-  "top_predictions": [...]
-}
-```
-
----
-
-## 🧠 `llm_service.py`
-
-Responsável por:
-
-* Comunicação com LLM (LM Studio)
-* Suporte a:
-
-  * texto
-  * imagem (base64)
-
-### ✔️ Funções:
-
-* `generate_response()` → texto
-* `generate_response_with_image()` → multimodal
-
----
-
-## 📊 `dataset_service.py` *(opcional)*
-
-* Manipulação de datasets
-* Pode ser usado para treino
-
----
-
-## 🔁 `train_service.py` / `train_from_queue.py`
-
-* Pipeline de treinamento
-* Automatização de treino
-
-👉 nível avançado (MLOps)
-
----
-
-## 🔄 `retrain_queue.py`
-
-* Fila de re-treinamento
-* Permite evolução contínua do modelo
-
----
-
-## 🧾 `session_service.py`
-
-* Gerencia sessões de análise
-* Armazena histórico
-
----
-
-# 🔹 3. Schemas (`schemas/`)
-
-Define estrutura de entrada/saída (Pydantic)
-
-### ✔️ `image.py`
-
-```python
-class ImageRequest(BaseModel):
-    image: str
-```
-
----
-
-### ✔️ `chat.py`
-
-* Estrutura de mensagens
-
----
-
-### ✔️ `history.py`
-
-* Estrutura de histórico
-
----
-
-# 🔹 4. Database (`database/`)
-
-Gerencia persistência
-
----
-
-### ✔️ `db.py`
-
-* Conexão com banco (SQLite)
-
----
-
-### ✔️ `models.py`
-
-* Modelos ORM
-
----
-
-### ✔️ `history.py`
-
-* Histórico de interações
-
----
-
-### ✔️ `result.py`
-
-* Armazena resultados das análises
-
----
-
-# 🔹 5. Repositories (`repositories/`)
-
-Camada de acesso a dados
-
-### ✔️ `image_repository.py`
-
-* Persistência de imagens
-
----
-
-👉 Serve para separar:
-
-* lógica de negócio
-* acesso ao banco
-
----
-
-# 🔹 6. Models (`models/`)
-
-Armazena modelos treinados:
-
-```bash
-cnn_model_latest.pth
-```
-
----
-
-# 🔹 7. Uploads (`uploads/`)
-
-Armazena imagens enviadas
-
----
-
-# 🔹 8. `main.py`
-
-Ponto de entrada da aplicação
-
-### Responsável por:
-
-* Inicializar FastAPI
-* Registrar rotas
-* Subir servidor
-
----
-
-# 🔥 Pipeline Completo (IMPORTANTE)
+### 🔥 Pipeline completo:
 
 ```text
-[Cliente / Frontend]
+[Frontend / Cliente]
         ↓
 POST /vision/analyze
         ↓
 image_service
         ↓
-cnn_service
+cnn_service (classificação)
         ↓
-[Se confiança baixa]
+[Fallback se necessário]
         ↓
-llm_service (com imagem)
+llm_service (análise multimodal)
         ↓
-Parser JSON
+Parser + estruturação
         ↓
-Resposta estruturada
+Resposta final (JSON)
 ```
 
 ---
 
-# 🧠 Diferenciais do Backend
+## 🏗️ Estrutura do Projeto
 
-## 🚀 1. Pipeline híbrido
-
-* CNN + LLM
-* fallback inteligente
-
----
-
-## 🚀 2. Análise automática
-
-* descrição da imagem
-* análise crítica
-* sugestões de melhoria
-
----
-
-## 🚀 3. Arquitetura escalável
-
-* separação por camadas
-* fácil evolução
+```bash
+backend/
+│
+├── api/               # Endpoints FastAPI
+├── services/          # Lógica principal (core do sistema)
+├── schemas/           # Validação (Pydantic)
+├── database/          # SQLite e modelos
+├── repositories/      # Acesso a dados
+├── models/            # Modelos treinados (.pth)
+├── uploads/           # Imagens recebidas
+│
+├── main.py            # Entrada da aplicação
+└── app.db             # Banco local
+```
 
 ---
 
-## 🚀 4. Suporte multimodal
+## ⚙️ Tecnologias Utilizadas
 
-* texto + imagem
+| Categoria  | Stack                           |
+| ---------- | ------------------------------- |
+| Backend    | FastAPI, Python                 |
+| IA (Visão) | PyTorch, TorchVision (ResNet18) |
+| IA (Texto) | LLM via LM Studio               |
+| Banco      | SQLite                          |
+| Imagem     | PIL, OpenCV                     |
 
 ---
 
-# ⚠️ Limitações
+## 🚀 Funcionalidades
 
-* Dependência de modelo CNN treinado
-* LLM não fornece probabilidade real
+### 🔹 Classificação com CNN
+
+* Modelo ResNet18 treinado
+* Suporte a top-k predições
+* Retorno estruturado com confiança
+
+```json
+{
+  "label": "asphalt",
+  "confidence": 0.87
+}
+```
+
+---
+
+### 🔹 Análise com LLM
+
+* Geração de descrição da imagem
+* Interpretação semântica
+* Explicações do resultado da CNN
+
+---
+
+### 🔹 Pipeline híbrido (DIFERENCIAL)
+
+* CNN executa primeiro
+* LLM entra como fallback ou enriquecimento
+* Balanceia performance + inteligência
+
+---
+
+### 🔹 Persistência
+
+* Armazena análises no SQLite
+* Cache de resultados
+* Registro de métricas
+
+---
+
+## 🔌 API
+
+### 📍 Análise de imagem
+
+```bash
+POST /vision/analyze
+```
+
+**Exemplo:**
+
+```bash
+curl -X POST http://localhost:8000/vision/analyze \
+  -F "file=@imagem.jpg"
+```
+
+---
+
+## 🧠 Camadas do Sistema
+
+### 🔹 `image_service.py` (orquestrador)
+
+Responsável por todo o fluxo:
+
+* CNN → decisão → LLM → resposta final
+
+---
+
+### 🔹 `cnn_service.py`
+
+* Carrega modelo `.pth`
+* Executa inferência
+* Retorna predição estruturada
+
+---
+
+### 🔹 `llm_service.py`
+
+* Comunicação com LM Studio
+* Suporte multimodal (texto + imagem)
+
+---
+
+### 🔹 `db_service.py`
+
+* Persistência de análises
+* Cache e métricas
+
+---
+
+## 🔧 Instalação
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## ⚙️ Configuração (.env)
+
+```ini
+MODEL_PATH=models/cnn_model_latest.pth
+
+LM_STUDIO_URL=http://localhost:1234/v1/chat/completions
+MODEL_NAME=gpt-4
+
+DB_PATH=app.db
+```
+
+---
+
+## ▶️ Execução
+
+```bash
+uvicorn main:app --reload
+```
+
+---
+
+## 🧠 Diferenciais Técnicos
+
+* ✅ Pipeline híbrido (CNN + LLM)
+* ✅ Fallback inteligente baseado em confiança
+* ✅ Suporte multimodal
+* ✅ Arquitetura modular (clean architecture)
+* ✅ Preparado para evolução (MLOps / retraining)
+
+---
+
+## ⚠️ Limitações
+
+* Dependência de modelo treinado
+* LLM pode introduzir inconsistências
 * Latência maior no fallback
 
 ---
 
-# 🚀 Possíveis melhorias
+## 🚀 Melhorias Futuras
 
-* Ensemble CNN + LLM
-* Métricas reais (precision/recall)
-* Cache de inferência
+* Ensemble de modelos
+* Balanceamento automático de classes
+* Monitoramento de métricas em tempo real
 * Deploy com GPU
+* Sistema de feedback para retraining
 
 ---
 
-# 🎯 Conclusão
+## 🧠 Resumo Técnico 
 
-Este backend implementa uma solução robusta para análise de imagens, indo além da simples classificação ao incorporar:
-
-* interpretação semântica
-* análise crítica automatizada
-* arquitetura modular
-
----
-
-# 🧠 Resumo (pra você usar em apresentação)
-
-👉 “Construí um backend modular com FastAPI que combina CNN para classificação e LLM multimodal para análise crítica, criando um pipeline híbrido capaz de interpretar imagens além da predição.”
-
----
+> Desenvolvi um backend modular com FastAPI que integra CNN para classificação de imagens e LLM multimodal para análise semântica, criando um pipeline híbrido capaz de interpretar imagens além da predição, com fallback inteligente e arquitetura escalável.

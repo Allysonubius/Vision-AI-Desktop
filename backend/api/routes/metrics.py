@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import APIRouter
 from services.metrics_service import (
     get_summary,
@@ -33,3 +35,7 @@ def latency():
 @router.get("/cost")
 def cost():
     return get_cost()
+
+@router.get("/")
+async def get_metrics():
+    return {"status": "ok", "timestamp": datetime.now().isoformat()}

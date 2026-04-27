@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from database.db import SessionLocal
@@ -37,3 +37,12 @@ def get_history(session_id: str, db: Session = Depends(get_db)):
         .filter(History.session_id == session_id)\
         .order_by(History.created_at.desc())\
         .all()
+        
+@router.patch("/{session_id}/{answer_id}")
+async def update_answer(answer_id: int, new_answer: str, db: Session = Depends(get_db)):
+    item = db.query(History).get(answer_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Answer not found")
+    item.answer = new_answer
+    db.commit()
+    return item

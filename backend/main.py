@@ -1,36 +1,24 @@
 from database.db import Base, engine
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from database.result import ImageResult
+from services.db_service import init_analysis_table, init_metrics_table
+from api.routes import vision, chat, history, health, metrics
+from core.cors import setup_cors 
 
-from api.routes import vision, chat, history, health, metrics  # 👈 ADD metrics
+import logging
 
-from services.db_service import (
-    init_analysis_table,
-    init_metrics_table,
-    create_indexes
-)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
 # =========================
-# 🔥 CRIA TABELAS (SQLAlchemy)
+# 🔥 CRIA TABELAS
 # =========================
 Base.metadata.create_all(bind=engine)
 
 # =========================
-# 🔥 CORS
+# 🔥 CORS 
 # =========================
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000"
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+setup_cors(app)
 
 # =========================
 # 🔥 ROTAS
@@ -39,19 +27,19 @@ app.include_router(vision.router, prefix="/vision")
 app.include_router(chat.router, prefix="/chat")
 app.include_router(history.router, prefix="/history")
 app.include_router(health.router, prefix="/health")
-app.include_router(metrics.router, prefix="/metrics")  # 👈 NOVO
+app.include_router(metrics.router, prefix="/metrics")
 
 # =========================
 # 🔥 STARTUP
 # =========================
-@app.on_event("startup")
-def startup():
-    # SQLite (cache + métricas)
-    init_analysis_table()
-    init_metrics_table()
-    create_indexes()
+# No startup, inicialize tabelas com logging
 
-    print("\n🚀 ROTAS REGISTRADAS:")
-    for route in app.routes:
-        methods = ",".join(route.methods or [])
-        print(f"{methods:10} {route.path}")
+@app.on_event("startup")
+async def startup():
+    try:
+        logger.info("Inicializando tabelas...")
+        init_analysis_table()
+        init_metrics_table()
+        logger.info("Tabelas inicializadas com sucesso.")
+    except Exception as e:
+        logger.error(f"Erro ao inicializar serviços: {e}")
